@@ -3,133 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zombie Warriors - Dashboard</title>
+    <title>Zombie Warriors - Staff Login</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
             background-color: #f4f4f4;
             color: #333;
-            text-align: center;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-        .container {
-            max-width: 700px;
-            margin: auto;
+        .login-container {
             background: white;
-            padding: 20px;
+            padding: 30px;
             border-radius: 15px;
+            text-align: center;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             animation: fadeIn 1s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        h1 { color: #5C67F2; }
-        .user-info { font-size: 18px; margin: 20px 0; }
-        .music-panel, .music-manager-panel, .no-content-panel {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        h1 {
+            font-size: 28px;
+            color: #5C67F2;
         }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            border: none;
-            border-radius: 10px;
+        .subtitle {
             font-size: 16px;
+            margin-bottom: 25px;
+            color: #666;
+        }
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input {
+            width: 80%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 25px;
+            background: #f0f0f0;
+            color: #333;
+            text-align: center;
             outline: none;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        input:focus {
+            border: 2px solid #5C67F2;
+            background: #fff;
         }
         button {
+            width: 80%;
+            padding: 14px;
+            border: none;
+            border-radius: 25px;
             background: #5C67F2;
             color: white;
+            font-size: 18px;
             cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
         }
-        button:hover { background: #4a5bd2; }
-        .music-list {
-            list-style: none;
-            padding: 0;
+        button:hover {
+            background: #4a54e1;
         }
-        .music-list li {
-            background: #f8f8f8;
-            margin: 5px 0;
-            padding: 10px;
-            border-radius: 8px;
+        button:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome, <span id="username">User</span>!</h1>
-        <p class="user-info">Your permissions are set to: <span id="user-role">Role</span></p>
-    </div>
-    
-    <div class="music-panel" id="music-panel">
-        <h2>Upload Your Music</h2>
-        <input type="text" id="musicName" placeholder="Music Name">
-        <input type="file" id="musicFile" accept="audio/*">
-        <button id="uploadMusic">Upload Music</button>
-        <h3>Your Uploaded Music</h3>
-        <ul id="user-music-list" class="music-list"></ul>
-    </div>
-    
-    <div class="music-manager-panel" id="music-manager-panel">
-        <h2>All Uploaded Music</h2>
-        <ul id="all-music-list" class="music-list"></ul>
-    </div>
-    
-    <div class="no-content-panel" id="no-content-panel">
-        <h2>No content assigned to your role</h2>
-        <p>Please wait for an administrator to assign content to your account.</p>
+    <div class="login-container">
+        <h1>Zombie Warriors Staff (To-Do)</h1>
+        <p class="subtitle">Enter your access code</p>
+        <form id="loginForm">
+            <input type="text" id="accessCode" placeholder="Access Code" required>
+            <button type="submit">Login</button>
+        </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "API_KEY",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
             projectId: "zombiewarriors-todo",
-            storageBucket: "zombiewarriors-todo.appspot.com",
+            storageBucket: "zombiewarriors-todo.firebaseapp.com",
             messagingSenderId: "554720349093",
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
-        const username = "Lucas";
-        const role = "User";
-        document.getElementById("username").textContent = username;
-        document.getElementById("user-role").textContent = role;
-
-        async function uploadMusic() {
-            const musicName = document.getElementById("musicName").value;
-            const file = document.getElementById("musicFile").files[0];
-            if (!musicName || !file) return;
-
-            const storageRef = ref(storage, `music/${file.name}`);
-            await uploadBytes(storageRef, file);
-            const url = await getDownloadURL(storageRef);
-
-            await addDoc(collection(db, "music"), { name: musicName, url, uploadedBy: username });
-            loadUserMusic();
-        }
-
-        if (role === "Music Producer") {
-            document.getElementById("music-panel").style.display = "block";
-        } else if (role === "Manager") {
-            document.getElementById("music-manager-panel").style.display = "block";
-        } else {
-            document.getElementById("no-content-panel").style.display = "block";
-        }
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const accessCode = document.getElementById("accessCode").value.trim();
+            if (!accessCode) return alert("Enter a valid access code.");
+            
+            console.log("Checking access code: ", accessCode);
+            const userRef = doc(db, "users", accessCode);
+            try {
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    console.log("User found: ", userData);
+                    localStorage.setItem("username", userData.name);
+                    localStorage.setItem("role", userData.role);
+                    window.location.href = "dashboard.html"; // Stuur naar het dashboard
+                } else {
+                    console.warn("Invalid access code: No user found");
+                    alert("Invalid access code.");
+                }
+            } catch (error) {
+                console.error("Error fetching user data: ", error);
+                alert("Error connecting to database.");
+            }
+        });
     </script>
 </body>
 </html>
