@@ -7,14 +7,15 @@
     <script type="module">
         // Load Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
 
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
             projectId: "zombiewarriors-todo",
-            storageBucket: "zombiewarriors-todo.firebasestorage.app",
+            storageBucket: "zombiewarriors-todo.appspot.com",
             messagingSenderId: "554720349093",
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
@@ -22,6 +23,7 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         // Retrieve user data and generate menu
         document.addEventListener("DOMContentLoaded", () => {
@@ -33,39 +35,38 @@
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
 
-            // Define menu based on role
-            const menuItems = [
-                { name: "Dashboard", roles: ["Manager", "Scripter", "Blender Developer", "Animator", "Music Producer"] },
-                { name: "Team Management", roles: ["Manager"] },
-                { name: "Statistics", roles: ["Manager"] },
-                { name: "To-Do List", roles: ["Manager", "Scripter", "Blender Developer", "Animator"] },
-                { name: "Logout", roles: ["Manager", "Scripter", "Blender Developer", "Animator", "Music Producer"], logout: true }
-            ];
-
-            const sidebarMenu = document.getElementById("sidebar-menu");
-            menuItems.forEach(item => {
-                if (item.roles.includes(userRole)) {
-                    const li = document.createElement("li");
-                    li.textContent = item.name;
-                    if (item.logout) {
-                        li.style.background = "red";
-                        li.style.fontWeight = "bold";
-                        li.style.color = "white";
-                        li.onclick = logout;
-                    }
-                    li.onmouseover = () => li.style.transform = "scale(1.05)";
-                    li.onmouseout = () => li.style.transform = "scale(1)";
-                    sidebarMenu.appendChild(li);
-                }
-            });
+            // Show upload form only for Music Producers
+            if (userRole !== "Music Producer") {
+                document.getElementById("uploadSection").style.display = "none";
+            }
         });
 
-        // Logout function
-        function logout() {
-            sessionStorage.clear(); // Remove user data from session
-            window.location.href = "index.html"; // Redirect to login page
+        // Upload Music Function
+        async function uploadMusic() {
+            const title = document.getElementById("musicTitle").value;
+            const description = document.getElementById("musicDescription").value;
+            const file = document.getElementById("musicFile").files[0];
+            if (!title || !description || !file) {
+                alert("Please fill in all fields and select a file.");
+                return;
+            }
+            
+            const storageRef = ref(storage, `music/${file.name}`);
+            await uploadBytes(storageRef, file);
+            const fileURL = await getDownloadURL(storageRef);
+            
+            await addDoc(collection(db, "music"), {
+                title: title,
+                description: description,
+                fileURL: fileURL,
+                uploadedBy: sessionStorage.getItem("userName"),
+                timestamp: new Date()
+            });
+            
+            alert("Music uploaded successfully!");
+            document.getElementById("musicUploadForm").reset();
         }
-        window.logout = logout;
+        window.uploadMusic = uploadMusic;
     </script>
     <style>
         body {
@@ -114,6 +115,30 @@
             margin: 10px;
             display: inline-block;
         }
+        .upload-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: 20px auto;
+        }
+        .upload-form input, .upload-form textarea, .upload-form button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .upload-form button {
+            background: #1f78d1;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .upload-form button:hover {
+            background: #1558a5;
+        }
     </style>
 </head>
 <body>
@@ -125,6 +150,16 @@
         <h1>Welcome, <span id="userName"></span></h1>
         <div class="badge">Role: <span id="userRole"></span></div>
         <h2>Dashboard View</h2>
+
+        <div id="uploadSection" class="upload-form">
+            <h3>Upload Music</h3>
+            <form id="musicUploadForm">
+                <input type="text" id="musicTitle" placeholder="Title" required>
+                <textarea id="musicDescription" placeholder="Description" required></textarea>
+                <input type="file" id="musicFile" accept="audio/*" required>
+                <button type="button" onclick="uploadMusic()">Upload</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>
