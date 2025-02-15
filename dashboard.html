@@ -8,75 +8,78 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            display: flex;
-            height: 100vh;
+            padding: 20px;
             background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
         }
-        .sidebar {
-            width: 220px;
-            background: #003366;
-            color: white;
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
         }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            display: block;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            color: #5C67F2;
+        }
+        .user-info {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .admin-panel {
+            display: none;
+            margin-top: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
             border-radius: 5px;
-            margin: 5px 0;
-        }
-        .sidebar a:hover {
-            background: #00509e;
-        }
-        .main-content {
-            flex: 1;
-            padding: 20px;
-        }
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .task-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .task-item {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            border: 1px solid #ccc;
+            font-size: 16px;
         }
         button {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            background-color: #5C67F2;
             color: white;
-            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
         }
-        .btn-create { background: blue; }
-        .btn-delete { background: red; }
+        button:hover {
+            background-color: #4a54e1;
+        }
+        .delete-btn {
+            background-color: red;
+            margin-left: 10px;
+        }
+        .delete-btn:hover {
+            background-color: darkred;
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Dashboard</h2>
-        <a href="#">Home</a>
-        <a href="#">Tasks</a>
-        <a href="#">Users</a>
-        <a href="#">Logout</a>
-    </div>
-    <div class="main-content">
+    <div class="container">
         <h1>Welcome, <span id="username">User</span>!</h1>
-        <p>Your role: <span id="user-role">Role</span></p>
+        <p class="user-info">Your role: <span id="user-role">Role</span></p>
+
+        <div class="admin-panel" id="admin-panel">
+            <h2>Manage Users</h2>
+            <input type="text" id="newUserName" placeholder="User Name">
+            <input type="text" id="newUserRole" placeholder="Role (Member/Manager)">
+            <input type="text" id="newUserCode" placeholder="Access Code">
+            <button onclick="createUser()">Create User</button>
+
+            <h3>Existing Users</h3>
+            <ul id="user-list"></ul>
+        </div>
+        
+        <button onclick="logout()">Logout</button>
     </div>
 </body>
 </html>
