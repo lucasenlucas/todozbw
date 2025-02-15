@@ -35,11 +35,20 @@
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
 
-            // Show upload form only for Music Producers
-            if (userRole.toLowerCase() !== "music producer") {
-                document.getElementById("uploadSection").style.display = "none";
-            }
+            // Generate menu
+            const sidebarMenu = document.getElementById("sidebar-menu");
+            sidebarMenu.innerHTML = `
+                <li onclick="showSection('dashboard')">Dashboard</li>
+                ${userRole.toLowerCase() === "music producer" ? '<li onclick="showSection(\'uploadMusic\')">Upload Music</li>' : ''}
+                <li onclick="logout()" style="background: red; color: white; font-weight: bold;">Logout</li>
+            `;
         });
+
+        // Show selected section
+        function showSection(section) {
+            document.getElementById("dashboardSection").style.display = section === "dashboard" ? "block" : "none";
+            document.getElementById("uploadSection").style.display = section === "uploadMusic" ? "block" : "none";
+        }
 
         // Upload Music Function
         async function uploadMusic() {
@@ -67,6 +76,13 @@
             document.getElementById("musicUploadForm").reset();
         }
         window.uploadMusic = uploadMusic;
+
+        // Logout function
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = "index.html";
+        }
+        window.logout = logout;
     </script>
     <style>
         body {
@@ -123,22 +139,6 @@
             width: 300px;
             margin: 20px auto;
         }
-        .upload-form input, .upload-form textarea, .upload-form button {
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .upload-form button {
-            background: #1f78d1;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .upload-form button:hover {
-            background: #1558a5;
-        }
     </style>
 </head>
 <body>
@@ -149,9 +149,12 @@
     <div class="content">
         <h1>Welcome, <span id="userName"></span></h1>
         <div class="badge">Role: <span id="userRole"></span></div>
-        <h2>Dashboard View</h2>
 
-        <div id="uploadSection" class="upload-form">
+        <div id="dashboardSection">
+            <h2>Dashboard View</h2>
+        </div>
+
+        <div id="uploadSection" class="upload-form" style="display: none;">
             <h3>Upload Music</h3>
             <form id="musicUploadForm">
                 <input type="text" id="musicTitle" placeholder="Title" required>
