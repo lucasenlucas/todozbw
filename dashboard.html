@@ -28,7 +28,7 @@
         }
         h1 { color: #5C67F2; }
         .user-info { font-size: 18px; margin: 20px 0; }
-        .music-panel, .music-manager-panel {
+        .music-panel, .music-manager-panel, .no-content-panel {
             display: none;
             margin-top: 20px;
             padding: 15px;
@@ -81,6 +81,11 @@
         <h2>All Uploaded Music</h2>
         <ul id="all-music-list" class="music-list"></ul>
     </div>
+    
+    <div class="no-content-panel" id="no-content-panel">
+        <h2>No content assigned to your role</h2>
+        <p>Please wait for an administrator to assign content to your account.</p>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
@@ -101,7 +106,7 @@
         const storage = getStorage(app);
 
         const username = "Lucas";
-        const role = "Music Producer";
+        const role = "User";
         document.getElementById("username").textContent = username;
         document.getElementById("user-role").textContent = role;
 
@@ -118,24 +123,12 @@
             loadUserMusic();
         }
 
-        async function loadUserMusic() {
-            const userMusicList = document.getElementById("user-music-list");
-            userMusicList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "music"));
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                if (data.uploadedBy === username) {
-                    const li = document.createElement("li");
-                    li.innerHTML = `${data.name} - <audio controls><source src='${data.url}' type='audio/mpeg'></audio> <a href='${data.url}' download>Download</a>`;
-                    userMusicList.appendChild(li);
-                }
-            });
-        }
-
         if (role === "Music Producer") {
             document.getElementById("music-panel").style.display = "block";
-            document.getElementById("uploadMusic").addEventListener("click", uploadMusic);
-            loadUserMusic();
+        } else if (role === "Manager") {
+            document.getElementById("music-manager-panel").style.display = "block";
+        } else {
+            document.getElementById("no-content-panel").style.display = "block";
         }
     </script>
 </body>
