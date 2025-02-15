@@ -23,7 +23,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Retrieve user data
+        // Retrieve user data and generate menu
         document.addEventListener("DOMContentLoaded", () => {
             const userName = sessionStorage.getItem("userName");
             const userRole = sessionStorage.getItem("userRole");
@@ -32,6 +32,32 @@
             }
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
+
+            // Define menu based on role
+            const menuItems = [
+                { name: "Dashboard", roles: ["Manager", "Scripter", "Blender Developer", "Animator", "Music Producer"] },
+                { name: "Team Management", roles: ["Manager"] },
+                { name: "Statistics", roles: ["Manager"] },
+                { name: "To-Do List", roles: ["Manager", "Scripter", "Blender Developer", "Animator"] },
+                { name: "Logout", roles: ["Manager", "Scripter", "Blender Developer", "Animator", "Music Producer"], logout: true }
+            ];
+
+            const sidebarMenu = document.getElementById("sidebar-menu");
+            menuItems.forEach(item => {
+                if (item.roles.includes(userRole)) {
+                    const li = document.createElement("li");
+                    li.textContent = item.name;
+                    if (item.logout) {
+                        li.style.background = "red";
+                        li.style.fontWeight = "bold";
+                        li.style.color = "white";
+                        li.onclick = logout;
+                    }
+                    li.onmouseover = () => li.style.transform = "scale(1.05)";
+                    li.onmouseout = () => li.style.transform = "scale(1)";
+                    sidebarMenu.appendChild(li);
+                }
+            });
         });
 
         // Logout function
@@ -75,14 +101,6 @@
             transform: scale(1.05);
             background: rgba(255, 255, 255, 0.2);
         }
-        .sidebar ul li:last-child {
-            background: red;
-            font-weight: bold;
-            color: white;
-        }
-        .sidebar ul li:last-child:hover {
-            background: darkred;
-        }
         .content {
             flex-grow: 1;
             padding: 20px;
@@ -101,13 +119,7 @@
 <body>
     <div class="sidebar">
         <h2>Staff Menu</h2>
-        <ul>
-            <li>Dashboard</li>
-            <li>Team Management</li>
-            <li>Statistics</li>
-            <li>To-Do List</li>
-            <li onclick="logout()">Logout</li>
-        </ul>
+        <ul id="sidebar-menu"></ul>
     </div>
     <div class="content">
         <h1>Welcome, <span id="userName"></span></h1>
