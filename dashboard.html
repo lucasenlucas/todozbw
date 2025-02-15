@@ -64,13 +64,24 @@
             padding: 0;
         }
         .sidebar ul li {
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            text-align: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .sidebar ul li:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
         }
         .sidebar ul li:last-child {
-            color: red;
+            background: red;
             font-weight: bold;
-            cursor: pointer;
+            color: white;
+        }
+        .sidebar ul li:last-child:hover {
+            background: darkred;
         }
         .content {
             flex-grow: 1;
