@@ -36,7 +36,7 @@
             document.getElementById("userRole").innerText = userRole;
 
             // Show upload form only for Music Producers
-            if (userRole !== "Music Producer") {
+            if (userRole.toLowerCase() !== "music producer") {
                 document.getElementById("uploadSection").style.display = "none";
             }
         });
