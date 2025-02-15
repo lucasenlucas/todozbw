@@ -114,29 +114,38 @@
         }
 
         // Function to create a new user
-        async function createUser() {
-            const newUserName = document.getElementById("newUserName").value.trim();
-            const newUserRole = document.getElementById("newUserRole").value.trim();
-            const newUserCode = document.getElementById("newUserCode").value.trim();
+     // Function to create a new user
+async function createUser() {
+    const newUserName = document.getElementById("newUserName").value.trim();
+    const newUserRole = document.getElementById("newUserRole").value.trim();
+    const newUserCode = document.getElementById("newUserCode").value.trim();
 
-            if (!newUserName || !newUserRole || !newUserCode) {
-                alert("Please fill in all fields.");
-                return;
-            }
+    console.log("Create User Button Clicked"); // Debug 1
 
-            try {
-                await setDoc(doc(db, "users", newUserCode), {
-                    name: newUserName,
-                    role: newUserRole,
-                    code: newUserCode
-                });
-                alert("User created successfully!");
-                loadUsers(); // Refresh user list
-            } catch (error) {
-                console.error("Error adding user: ", error);
-                alert("Error creating user.");
-            }
-        }
+    if (!newUserName || !newUserRole || !newUserCode) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    console.log("User input: ", newUserName, newUserRole, newUserCode); // Debug 2
+
+    try {
+        const userRef = doc(db, "users", newUserCode); // Maak document met de code als ID
+        await setDoc(userRef, {
+            name: newUserName,
+            role: newUserRole,
+            code: newUserCode
+        });
+
+        console.log("User successfully added to Firestore!"); // Debug 3
+        alert("User created successfully!");
+        loadUsers(); // Refresh user list
+    } catch (error) {
+        console.error("Error adding user: ", error);
+        alert("Error creating user. Check the console.");
+    }
+}
+
 
         // Function to load existing users
         async function loadUsers() {
