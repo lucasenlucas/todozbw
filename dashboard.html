@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Staff</title>
     <script type="module">
-        // Firebase SDK laden
+        // Load Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-        // Firebase configuratie
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
@@ -19,16 +19,16 @@
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
 
-        // Firebase initialiseren
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Gebruikersgegevens ophalen
+        // Retrieve user data
         document.addEventListener("DOMContentLoaded", () => {
             const userName = sessionStorage.getItem("userName");
             const userRole = sessionStorage.getItem("userRole");
             if (!userName || !userRole) {
-                window.location.href = "index.html"; // Terug naar login als er geen data is
+                window.location.href = "index.html"; // Redirect to login if no data exists
             }
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
@@ -80,16 +80,16 @@
         <h2>Staff Menu</h2>
         <ul>
             <li>Dashboard</li>
-            <li>Teambeheer</li>
-            <li>Statistieken</li>
-            <li>To-Do Lijst</li>
-            <li>Uitloggen</li>
+            <li>Team Management</li>
+            <li>Statistics</li>
+            <li>To-Do List</li>
+            <li>Logout</li>
         </ul>
     </div>
     <div class="content">
-        <h1>Welkom, <span id="userName"></span></h1>
-        <div class="badge">Rol: <span id="userRole"></span></div>
-        <h2>Dashboard Weergave</h2>
+        <h1>Welcome, <span id="userName"></span></h1>
+        <div class="badge">Role: <span id="userRole"></span></div>
+        <h2>Dashboard View</h2>
     </div>
 </body>
 </html>
