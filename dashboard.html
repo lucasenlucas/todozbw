@@ -73,7 +73,7 @@
             <input type="text" id="newUserName" placeholder="User Name">
             <input type="text" id="newUserRole" placeholder="Role (Member/Manager)">
             <input type="text" id="newUserCode" placeholder="Access Code">
-            <button onclick="createUser()">Create User</button>
+            <button id="createUserBtn">Create User</button>
 
             <h3>Existing Users</h3>
             <ul id="user-list"></ul>
@@ -83,7 +83,6 @@
     </div>
 
     <script type="module">
-        // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getFirestore, collection, setDoc, doc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
@@ -101,6 +100,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Debugging: Check of Firebase geladen is
+        console.log("Firebase Config: ", firebaseConfig);
+        console.log("Firestore DB: ", db);
+
         // Get user info from localStorage
         const username = localStorage.getItem("username") || "Unknown";
         const role = localStorage.getItem("role") || "Unknown";
@@ -114,38 +117,37 @@
         }
 
         // Function to create a new user
-     // Function to create a new user
-async function createUser() {
-    const newUserName = document.getElementById("newUserName").value.trim();
-    const newUserRole = document.getElementById("newUserRole").value.trim();
-    const newUserCode = document.getElementById("newUserCode").value.trim();
+        async function createUser() {
+            const newUserName = document.getElementById("newUserName").value.trim();
+            const newUserRole = document.getElementById("newUserRole").value.trim();
+            const newUserCode = document.getElementById("newUserCode").value.trim();
 
-    console.log("Create User Button Clicked"); // Debug 1
+            console.log("Create User Button Clicked"); // Debug 1
 
-    if (!newUserName || !newUserRole || !newUserCode) {
-        alert("Please fill in all fields.");
-        return;
-    }
+            if (!newUserName || !newUserRole || !newUserCode) {
+                console.warn("Missing fields!"); // Debug 2
+                alert("Please fill in all fields.");
+                return;
+            }
 
-    console.log("User input: ", newUserName, newUserRole, newUserCode); // Debug 2
+            console.log("User input:", newUserName, newUserRole, newUserCode); // Debug 3
 
-    try {
-        const userRef = doc(db, "users", newUserCode); // Maak document met de code als ID
-        await setDoc(userRef, {
-            name: newUserName,
-            role: newUserRole,
-            code: newUserCode
-        });
+            try {
+                const userRef = doc(db, "users", newUserCode);
+                await setDoc(userRef, {
+                    name: newUserName,
+                    role: newUserRole,
+                    code: newUserCode
+                });
 
-        console.log("User successfully added to Firestore!"); // Debug 3
-        alert("User created successfully!");
-        loadUsers(); // Refresh user list
-    } catch (error) {
-        console.error("Error adding user: ", error);
-        alert("Error creating user. Check the console.");
-    }
-}
-
+                console.log("User successfully added to Firestore!"); // Debug 4
+                alert("User created successfully!");
+                loadUsers(); // Refresh user list
+            } catch (error) {
+                console.error("Error adding user: ", error);
+                alert("Error creating user. Check the console.");
+            }
+        }
 
         // Function to load existing users
         async function loadUsers() {
@@ -181,8 +183,8 @@ async function createUser() {
             window.location.href = "index.html";
         }
 
-        // Expose deleteUser to global scope
-        window.deleteUser = deleteUser;
+        // Koppel de knop aan de functie
+        document.getElementById("createUserBtn").addEventListener("click", createUser);
     </script>
 </body>
 </html>
