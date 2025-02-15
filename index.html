@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zombie Warriors - Staff Login</title>
+    <title>Zombie Warriors - Login</title>
     <style>
         body {
-            background-color: #f4f4f4;
-            color: #333;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            background-color: #f4f4f4;
         }
         .login-container {
             background: white;
@@ -21,123 +21,81 @@
             border-radius: 15px;
             text-align: center;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 1s ease-in-out;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         h1 {
             font-size: 28px;
             color: #5C67F2;
         }
-        .subtitle {
-            font-size: 16px;
-            margin-bottom: 25px;
-            color: #666;
-        }
-        form {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        input {
+        input, button {
             width: 80%;
             padding: 12px;
-            margin-bottom: 20px;
+            margin: 10px 0;
             border: none;
             border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+        }
+        input {
             background: #f0f0f0;
             color: #333;
-            text-align: center;
-            outline: none;
-            transition: all 0.3s;
-            font-size: 16px;
-        }
-        input:focus {
-            border: 2px solid #5C67F2;
-            background: #fff;
         }
         button {
-            width: 80%;
-            padding: 14px;
-            border: none;
-            border-radius: 25px;
             background: #5C67F2;
             color: white;
-            font-size: 18px;
             cursor: pointer;
-            transition: background 0.3s, transform 0.1s;
         }
         button:hover {
             background: #4a54e1;
-        }
-        button:active {
-            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h1>Zombie Warriors Staff (To-Do)</h1>
-        <p class="subtitle">Enter your access code</p>
-        <form>
-            <input type="text" id="code" placeholder="Enter Access Code" required>
-            <button type="submit" id="login-btn">Login</button>
+        <h1>Zombie Warriors Staff</h1>
+        <p>Enter your access code</p>
+        <form id="loginForm">
+            <input type="text" id="accessCode" placeholder="Access Code" required>
+            <button type="submit">Login</button>
         </form>
     </div>
 
-    <!-- Firebase SDK & Login Script -->
     <script type="module">
-        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
+            apiKey: "API_KEY",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
             projectId: "zombiewarriors-todo",
-            storageBucket: "zombiewarriors-todo.firebasestorage.app",
+            storageBucket: "zombiewarriors-todo.firebaseapp.com",
             messagingSenderId: "554720349093",
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Login function
-        async function login() {
-            const codeInput = document.getElementById("code").value.trim();
-            if (!codeInput) {
-                alert("Please enter a valid access code.");
-                return;
-            }
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const accessCode = document.getElementById("accessCode").value.trim();
+            if (!accessCode) return alert("Enter a valid access code.");
 
-            // Check if user exists in Firestore
-            const userRef = doc(db, "users", codeInput);
+            const userRef = doc(db, "users", accessCode);
             const userSnap = await getDoc(userRef);
 
             if (userSnap.exists()) {
                 const userData = userSnap.data();
                 localStorage.setItem("username", userData.name);
                 localStorage.setItem("role", userData.role);
-                localStorage.setItem("userCode", codeInput);
-                window.location.href = "dashboard.html"; // Redirect to dashboard
+                window.location.href = "dashboard.html";
             } else {
-                alert("Invalid access code!");
+                alert("Invalid access code.");
             }
-        }
-
-        document.getElementById("login-btn").addEventListener("click", (e) => {
-            e.preventDefault();
-            login();
         });
     </script>
 </body>
