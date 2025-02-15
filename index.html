@@ -86,22 +86,24 @@
     <div class="login-container">
         <h1>Zombie Warriors Staff (To-Do)</h1>
         <p class="subtitle">Enter your access code</p>
-        <form id="loginForm">
-            <input type="text" id="accessCode" placeholder="Access Code" required>
-            <button type="submit">Login</button>
+        <form>
+            <input type="text" id="code" placeholder="Enter Access Code" required>
+            <button type="submit" id="login-btn">Login</button>
         </form>
     </div>
 
+    <!-- Firebase SDK & Login Script -->
     <script type="module">
+        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-        // Firebase Config
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "API_KEY",
+            apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
             projectId: "zombiewarriors-todo",
-            storageBucket: "zombiewarriors-todo.firebaseapp.com",
+            storageBucket: "zombiewarriors-todo.firebasestorage.app",
             messagingSenderId: "554720349093",
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
@@ -110,22 +112,32 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const accessCode = document.getElementById("accessCode").value.trim();
-            if (!accessCode) return alert("Enter a valid access code.");
+        // Login function
+        async function login() {
+            const codeInput = document.getElementById("code").value.trim();
+            if (!codeInput) {
+                alert("Please enter a valid access code.");
+                return;
+            }
 
-            const userRef = doc(db, "users", accessCode);
+            // Check if user exists in Firestore
+            const userRef = doc(db, "users", codeInput);
             const userSnap = await getDoc(userRef);
 
             if (userSnap.exists()) {
                 const userData = userSnap.data();
                 localStorage.setItem("username", userData.name);
                 localStorage.setItem("role", userData.role);
-                window.location.href = "dashboard.html"; // Stuur naar het dashboard
+                localStorage.setItem("userCode", codeInput);
+                window.location.href = "dashboard.html"; // Redirect to dashboard
             } else {
-                alert("Invalid access code.");
+                alert("Invalid access code!");
             }
+        }
+
+        document.getElementById("login-btn").addEventListener("click", (e) => {
+            e.preventDefault();
+            login();
         });
     </script>
 </body>
