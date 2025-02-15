@@ -68,6 +68,10 @@
             max-width: 600px;
             text-align: center;
         }
+        .admin-panel {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -81,36 +85,85 @@
     <div id="popup" class="popup"></div>
     <div id="banner" class="banner"></div>
 
-    <script>
-        const userRole = "Manager"; // Dit kan je dynamisch instellen
-        const userName = "Lucas"; // Dit komt normaal uit je database
-        document.getElementById("username").textContent = userName;
-        document.getElementById("user-role").textContent = userRole;
+    <div class="admin-panel" id="admin-panel">
+        <h2>Manage Notifications</h2>
+        <input type="text" id="notificationMessage" placeholder="Notification message">
+        <select id="notificationType">
+            <option value="popup">Popup</option>
+            <option value="banner">Banner</option>
+            <option value="alert">Alert</option>
+        </select>
+        <button id="addNotification">Add Notification</button>
+        <h3>Existing Notifications</h3>
+        <ul id="notification-list"></ul>
+    </div>
 
-        function showPopup(message, imageUrl) {
-            const popup = document.getElementById("popup");
-            popup.innerHTML = `<p>${message}</p>`;
-            if (imageUrl) {
-                popup.innerHTML += `<img src="${imageUrl}" width="100%">`;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "API_KEY",
+            authDomain: "zombiewarriors-todo.firebaseapp.com",
+            projectId: "zombiewarriors-todo",
+            storageBucket: "zombiewarriors-todo.firebasestorage.app",
+            messagingSenderId: "554720349093",
+            appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const username = "Lucas";
+        const role = "Manager";
+        document.getElementById("username").textContent = username;
+        document.getElementById("user-role").textContent = role;
+
+        async function loadNotifications() {
+            const notificationList = document.getElementById("notification-list");
+            notificationList.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "notifications"));
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const li = document.createElement("li");
+                li.innerHTML = `${data.type}: ${data.message} 
+                    <button onclick="deleteNotification('${docSnap.id}')">Delete</button>`;
+                notificationList.appendChild(li);
+                showNotification(data.type, data.message);
+            });
+        }
+
+        async function addNotification() {
+            const message = document.getElementById("notificationMessage").value;
+            const type = document.getElementById("notificationType").value;
+            if (!message) return;
+            await addDoc(collection(db, "notifications"), { type, message });
+            loadNotifications();
+        }
+
+        async function deleteNotification(id) {
+            await deleteDoc(doc(db, "notifications", id));
+            loadNotifications();
+        }
+
+        function showNotification(type, message) {
+            if (type === "popup") {
+                document.getElementById("popup").textContent = message;
+                document.getElementById("popup").style.display = "block";
+                setTimeout(() => document.getElementById("popup").style.display = "none", 10000);
+            } else if (type === "banner") {
+                document.getElementById("banner").textContent = message;
+                document.getElementById("banner").style.display = "block";
+                setTimeout(() => document.getElementById("banner").style.display = "none", 10000);
+            } else if (type === "alert") {
+                alert(message);
             }
-            popup.style.display = "block";
-            setTimeout(() => popup.style.display = "none", 10000);
         }
 
-        function showBanner(message) {
-            const banner = document.getElementById("banner");
-            banner.textContent = message;
-            banner.style.display = "block";
-            setTimeout(() => banner.style.display = "none", 10000);
-        }
-
-        function showAlert(message) {
-            alert(message);
-        }
-
-        if (userRole === "Manager") {
-            showPopup("New update available!", "https://webtinq.nl/fotos-howtohack/afbeeldingen/Scherm%C2%ADafbeelding%202025-02-15%20om%2018.47.43.png");
-            showBanner("System maintenance scheduled for tomorrow.");
+        if (role === "Manager") {
+            document.getElementById("admin-panel").style.display = "block";
+            document.getElementById("addNotification").addEventListener("click", addNotification);
+            loadNotifications();
         }
     </script>
 </body>
