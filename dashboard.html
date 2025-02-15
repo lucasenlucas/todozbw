@@ -146,7 +146,7 @@
             querySnapshot.forEach((docSnap) => {
                 const userData = docSnap.data();
                 const li = document.createElement("li");
-                li.innerHTML = `${userData.name} - ${userData.role} (Code: ${userData.code}) 
+                li.innerHTML = `${userData.name} - ${userData.role} (Code: ${docSnap.id}) 
                     <button class="delete-btn" onclick="deleteUser('${docSnap.id}')">Delete</button>`;
                 userList.appendChild(li);
             });
