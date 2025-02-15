@@ -14,7 +14,7 @@
             text-align: center;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
             background: white;
             padding: 20px;
@@ -61,6 +61,20 @@
         .delete-btn:hover {
             background-color: darkred;
         }
+        .assign-btn {
+            background-color: green;
+            margin-left: 10px;
+        }
+        .assign-btn:hover {
+            background-color: darkgreen;
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e6e6e6;
+            border-radius: 10px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -71,24 +85,29 @@
         <div class="admin-panel" id="admin-panel">
             <h2>Manage Users</h2>
             <input type="text" id="newUserName" placeholder="User Name">
-            <input type="text" id="newUserRole" placeholder="Role (Member/Manager)">
+            <input type="text" id="newUserRole" placeholder="Role (See legend)">
             <input type="text" id="newUserCode" placeholder="Access Code">
             <button id="createUserBtn">Create User</button>
 
             <h3>Existing Users</h3>
             <ul id="user-list"></ul>
+
+            <div class="legend">
+                <h3>Legend - User Roles</h3>
+                <p><b>Manager</b> - Can manage users & tasks.</p>
+                <p><b>Roblox Developer</b> - Can only view tasks.</p>
+                <p><b>Scripter</b> - Can submit a description.</p>
+                <p><b>Staff</b> - Can submit assignments.</p>
+                <p><b>Head of</b> - Can assign tasks.</p>
+                <p><b>Blender Developer</b> - Can upload files & description.</p>
+            </div>
         </div>
 
         <div class="task-panel" id="task-panel">
-            <h2>Manage Tasks</h2>
-            <input type="text" id="taskTitle" placeholder="Task Title">
-            <input type="text" id="taskDescription" placeholder="Task Description">
-            <button id="createTaskBtn">Create Task</button>
-
-            <h3>Task List</h3>
+            <h2>Task List</h2>
             <ul id="task-list"></ul>
         </div>
-        
+
         <button onclick="logout()">Logout</button>
     </div>
 
@@ -98,7 +117,7 @@
 
         // Firebase Config
         const firebaseConfig = {
-            apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
+            apiKey: "API_KEY",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
             projectId: "zombiewarriors-todo",
             storageBucket: "zombiewarriors-todo.firebasestorage.app",
@@ -116,18 +135,17 @@
         document.getElementById("username").textContent = username;
         document.getElementById("user-role").textContent = role;
 
-        // Show panels for managers
-        if (role === "Manager" || role === "Owner") {
+        // Show admin panel for managers
+        if (role === "Manager" || role === "Head of") {
             document.getElementById("admin-panel").style.display = "block";
-            document.getElementById("task-panel").style.display = "block";
             loadUsers();
-            loadTasks();
-        } else {
+        }
+
+        if (role !== "Roblox Developer") {
             document.getElementById("task-panel").style.display = "block";
             loadTasks();
         }
 
-        // Create User
         async function createUser() {
             const newUserName = document.getElementById("newUserName").value.trim();
             const newUserRole = document.getElementById("newUserRole").value.trim();
@@ -153,47 +171,40 @@
             }
         }
 
-        // Create Task
-        async function createTask() {
-            const taskTitle = document.getElementById("taskTitle").value.trim();
-            const taskDescription = document.getElementById("taskDescription").value.trim();
-
-            if (!taskTitle || !taskDescription) {
-                alert("Please fill in all fields.");
-                return;
-            }
+        async function assignTask(userCode) {
+            const taskTitle = prompt("Enter task title:");
+            if (!taskTitle) return;
 
             try {
                 await addDoc(collection(db, "tasks"), {
-                    title: taskTitle,
-                    description: taskDescription
+                    assignedTo: userCode,
+                    title: taskTitle
                 });
-                alert("Task created successfully!");
+                alert("Task assigned successfully!");
                 loadTasks();
             } catch (error) {
-                console.error("Error adding task: ", error);
-                alert("Error creating task.");
+                console.error("Error assigning task: ", error);
             }
         }
 
-        // Load Tasks
-        async function loadTasks() {
-            const taskList = document.getElementById("task-list");
-            taskList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "tasks"));
+        async function loadUsers() {
+            const userList = document.getElementById("user-list");
+            userList.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "users"));
             querySnapshot.forEach((docSnap) => {
-                const taskData = docSnap.data();
+                const userData = docSnap.data();
                 const li = document.createElement("li");
-                li.innerHTML = `${taskData.title} - ${taskData.description} 
-                    <button class="delete-btn" onclick="deleteTask('${docSnap.id}')">Delete</button>`;
-                taskList.appendChild(li);
+                li.innerHTML = `${userData.name} - ${userData.role} (Code: ${docSnap.id}) 
+                    <button class="delete-btn" onclick="deleteUser('${docSnap.id}')">Delete</button>
+                    <button class="assign-btn" onclick="assignTask('${docSnap.id}')">Assign Task</button>`;
+                userList.appendChild(li);
             });
         }
 
-        async function deleteTask(taskId) {
-            await deleteDoc(doc(db, "tasks", taskId));
-            alert("Task deleted!");
-            loadTasks();
+        async function deleteUser(userId) {
+            await deleteDoc(doc(db, "users", userId));
+            alert("User deleted successfully!");
+            loadUsers();
         }
 
         function logout() {
@@ -202,8 +213,7 @@
         }
 
         document.getElementById("createUserBtn").addEventListener("click", createUser);
-        document.getElementById("createTaskBtn").addEventListener("click", createTask);
-        window.deleteTask = deleteTask;
+        window.deleteUser = deleteUser;
     </script>
 </body>
 </html>
