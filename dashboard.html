@@ -14,7 +14,7 @@
             text-align: center;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: auto;
             background: white;
             padding: 20px;
@@ -33,8 +33,7 @@
             font-size: 18px;
             margin: 20px 0;
         }
-        .admin-panel, .task-panel {
-            display: none;
+        .task-panel {
             margin-top: 20px;
         }
         input, button {
@@ -68,23 +67,12 @@
         <h1>Welcome, <span id="username">User</span>!</h1>
         <p class="user-info">Your role: <span id="user-role">Role</span></p>
 
-        <div class="admin-panel" id="admin-panel">
-            <h2>Manage Users</h2>
-            <input type="text" id="newUserName" placeholder="User Name">
-            <input type="text" id="newUserRole" placeholder="Role (Member/Manager)">
-            <input type="text" id="newUserCode" placeholder="Access Code">
-            <button id="createUserBtn">Create User</button>
-
-            <h3>Existing Users</h3>
-            <ul id="user-list"></ul>
-        </div>
-
         <div class="task-panel" id="task-panel">
             <h2>Manage Tasks</h2>
             <input type="text" id="taskTitle" placeholder="Task Title">
-            <input type="text" id="taskDescription" placeholder="Task Description">
-            <button id="createTaskBtn">Create Task</button>
-
+            <input type="text" id="taskDesc" placeholder="Task Description">
+            <input type="text" id="taskLink" placeholder="Task Link">
+            <button onclick="createTask()">Create Task</button>
             <h3>Task List</h3>
             <ul id="task-list"></ul>
         </div>
@@ -94,89 +82,39 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getFirestore, collection, setDoc, doc, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-        // Firebase Config
         const firebaseConfig = {
-            apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
+            apiKey: "API_KEY",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
             projectId: "zombiewarriors-todo",
             storageBucket: "zombiewarriors-todo.firebasestorage.app",
             messagingSenderId: "554720349093",
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
-
-        // Initialize Firebase
+        
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Get user info from localStorage
-        const username = localStorage.getItem("username") || "Unknown";
-        const role = localStorage.getItem("role") || "Unknown";
-        document.getElementById("username").textContent = username;
-        document.getElementById("user-role").textContent = role;
-
-        // Show panels for managers
-        if (role === "Manager" || role === "Owner") {
-            document.getElementById("admin-panel").style.display = "block";
-            document.getElementById("task-panel").style.display = "block";
-            loadUsers();
-            loadTasks();
-        } else {
-            document.getElementById("task-panel").style.display = "block";
-            loadTasks();
-        }
-
-        // Create User
-        async function createUser() {
-            const newUserName = document.getElementById("newUserName").value.trim();
-            const newUserRole = document.getElementById("newUserRole").value.trim();
-            const newUserCode = document.getElementById("newUserCode").value.trim();
-
-            if (!newUserName || !newUserRole || !newUserCode) {
-                alert("Please fill in all fields.");
-                return;
-            }
-
-            try {
-                const userRef = doc(db, "users", newUserCode);
-                await setDoc(userRef, {
-                    name: newUserName,
-                    role: newUserRole,
-                    code: newUserCode
-                });
-                alert("User created successfully!");
-                loadUsers();
-            } catch (error) {
-                console.error("Error adding user: ", error);
-                alert("Error creating user.");
-            }
-        }
-
-        // Create Task
         async function createTask() {
-            const taskTitle = document.getElementById("taskTitle").value.trim();
-            const taskDescription = document.getElementById("taskDescription").value.trim();
+            const title = document.getElementById("taskTitle").value.trim();
+            const description = document.getElementById("taskDesc").value.trim();
+            const link = document.getElementById("taskLink").value.trim();
 
-            if (!taskTitle || !taskDescription) {
+            if (!title || !description || !link) {
                 alert("Please fill in all fields.");
                 return;
             }
 
-            try {
-                await addDoc(collection(db, "tasks"), {
-                    title: taskTitle,
-                    description: taskDescription
-                });
-                alert("Task created successfully!");
-                loadTasks();
-            } catch (error) {
-                console.error("Error adding task: ", error);
-                alert("Error creating task.");
-            }
+            await addDoc(collection(db, "tasks"), {
+                title: title,
+                description: description,
+                link: link
+            });
+            alert("Task created successfully!");
+            loadTasks();
         }
 
-        // Load Tasks
         async function loadTasks() {
             const taskList = document.getElementById("task-list");
             taskList.innerHTML = "";
@@ -184,7 +122,7 @@
             querySnapshot.forEach((docSnap) => {
                 const taskData = docSnap.data();
                 const li = document.createElement("li");
-                li.innerHTML = `${taskData.title} - ${taskData.description} 
+                li.innerHTML = `${taskData.title} - ${taskData.description} (<a href="${taskData.link}" target="_blank">Link</a>)
                     <button class="delete-btn" onclick="deleteTask('${docSnap.id}')">Delete</button>`;
                 taskList.appendChild(li);
             });
@@ -192,7 +130,7 @@
 
         async function deleteTask(taskId) {
             await deleteDoc(doc(db, "tasks", taskId));
-            alert("Task deleted!");
+            alert("Task deleted successfully!");
             loadTasks();
         }
 
@@ -201,9 +139,7 @@
             window.location.href = "index.html";
         }
 
-        document.getElementById("createUserBtn").addEventListener("click", createUser);
-        document.getElementById("createTaskBtn").addEventListener("click", createTask);
-        window.deleteTask = deleteTask;
+        loadTasks();
     </script>
 </body>
 </html>
