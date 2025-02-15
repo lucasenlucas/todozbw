@@ -1,1 +1,95 @@
--
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Staff</title>
+    <script type="module">
+        // Firebase SDK laden
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        // Firebase configuratie
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
+            authDomain: "zombiewarriors-todo.firebaseapp.com",
+            projectId: "zombiewarriors-todo",
+            storageBucket: "zombiewarriors-todo.firebasestorage.app",
+            messagingSenderId: "554720349093",
+            appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
+        };
+
+        // Firebase initialiseren
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Gebruikersgegevens ophalen
+        document.addEventListener("DOMContentLoaded", () => {
+            const userName = sessionStorage.getItem("userName");
+            const userRole = sessionStorage.getItem("userRole");
+            if (!userName || !userRole) {
+                window.location.href = "index.html"; // Terug naar login als er geen data is
+            }
+            document.getElementById("userName").innerText = userName;
+            document.getElementById("userRole").innerText = userRole;
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(to right, #50C878, #1F78D1);
+            color: white;
+            padding: 20px;
+            text-align: left;
+        }
+        .sidebar h2 {
+            border-bottom: 2px solid white;
+            padding-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            text-align: center;
+        }
+        .badge {
+            background: linear-gradient(to right, #50C878, #1F78D1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 10px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Staff Menu</h2>
+        <ul>
+            <li>Dashboard</li>
+            <li>Teambeheer</li>
+            <li>Statistieken</li>
+            <li>To-Do Lijst</li>
+            <li>Uitloggen</li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>Welkom, <span id="userName"></span></h1>
+        <div class="badge">Rol: <span id="userRole"></span></div>
+        <h2>Dashboard Weergave</h2>
+    </div>
+</body>
+</html>
