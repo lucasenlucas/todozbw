@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Warriors - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1 {
+            color: #5C67F2;
+        }
+        .user-info {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .admin-panel {
+            display: none;
+            margin-top: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            background-color: #5C67F2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #4a54e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, <span id="username">User</span>!</h1>
+        <p class="user-info">Your role: <span id="user-role">Role</span></p>
+
+        <div class="admin-panel" id="admin-panel">
+            <h2>Manage Users</h2>
+            <input type="text" id="newUserName" placeholder="User Name">
+            <input type="text" id="newUserRole" placeholder="Role (Member/Manager)">
+            <input type="text" id="newUserCode" placeholder="Access Code">
+            <button onclick="createUser()">Create User</button>
+
+            <h3>Existing Users</h3>
+            <ul id="user-list"></ul>
+        </div>
+        
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
+            authDomain: "zombiewarriors-todo.firebaseapp.com",
+            projectId: "zombiewarriors-todo",
+            storageBucket: "zombiewarriors-todo.firebasestorage.app",
+            messagingSenderId: "554720349093",
+            appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get user info from localStorage
+        const username = localStorage.getItem("username") || "Unknown";
+        const role = localStorage.getItem("role") || "Unknown";
+        document.getElementById("username").textContent = username;
+        document.getElementById("user-role").textContent = role;
+
+        // Show admin panel for managers and owners
+        if (role === "Manager" || role === "Owner") {
+            document.getElementById("admin-panel").style.display = "block";
+            loadUsers();
+        }
+
+        // Function to create a new user
+        async function createUser() {
+            const newUserName = document.getElementById("newUserName").value.trim();
+            const newUserRole = document.getElementById("newUserRole").value.trim();
+            const newUserCode = document.getElementById("newUserCode").value.trim();
+
+            if (!newUserName || !newUserRole || !newUserCode) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "users"), {
+                    name: newUserName,
+                    role: newUserRole,
+                    code: newUserCode
+                });
+                alert("User created successfully!");
+                loadUsers(); // Refresh user list
+            } catch (error) {
+                console.error("Error adding user: ", error);
+                alert("Error creating user.");
+            }
+        }
+
+        // Function to load existing users
+        async function loadUsers() {
+            const userList = document.getElementById("user-list");
+            userList.innerHTML = ""; // Clear list
+            const querySnapshot = await getDocs(collection(db, "users"));
+            querySnapshot.forEach((doc) => {
+                const userData = doc.data();
+                const li = document.createElement("li");
+                li.textContent = `${userData.name} - ${userData.role} (Code: ${userData.code})`;
+                userList.appendChild(li);
+            });
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
