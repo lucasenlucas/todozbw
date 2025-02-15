@@ -114,7 +114,7 @@
             querySnapshot.forEach((docSnap) => {
                 const user = docSnap.data();
                 let option = document.createElement("option");
-                option.value = user.code;
+                option.value = docSnap.id; // ID gebruiken om taken te koppelen
                 option.textContent = user.name;
                 userSelect.appendChild(option);
             });
@@ -123,18 +123,19 @@
         async function createTask() {
             const title = document.getElementById("taskTitle").value;
             const description = document.getElementById("taskDesc").value;
-            const assignedToCode = document.getElementById("taskUser").value;
+            const assignedToId = document.getElementById("taskUser").value;
             const link = document.getElementById("taskLink").value;
             
-            if (!title || !description || !assignedToCode) {
+            if (!title || !description || !assignedToId) {
                 alert("Please fill all fields");
                 return;
             }
 
+            // Haal de naam van de gebruiker op
             const userSnapshot = await getDocs(collection(db, "users"));
             let assignedToName = "Unknown";
             userSnapshot.forEach((docSnap) => {
-                if (docSnap.data().code === assignedToCode) {
+                if (docSnap.id === assignedToId) {
                     assignedToName = docSnap.data().name;
                 }
             });
