@@ -33,6 +33,13 @@
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
         });
+
+        // Logout function
+        function logout() {
+            sessionStorage.clear(); // Remove user data from session
+            window.location.href = "index.html"; // Redirect to login page
+        }
+        window.logout = logout;
     </script>
     <style>
         body {
@@ -60,6 +67,11 @@
             padding: 10px;
             cursor: pointer;
         }
+        .sidebar ul li:last-child {
+            color: red;
+            font-weight: bold;
+            cursor: pointer;
+        }
         .content {
             flex-grow: 1;
             padding: 20px;
@@ -83,7 +95,7 @@
             <li>Team Management</li>
             <li>Statistics</li>
             <li>To-Do List</li>
-            <li>Logout</li>
+            <li onclick="logout()">Logout</li>
         </ul>
     </div>
     <div class="content">
