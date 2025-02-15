@@ -23,8 +23,13 @@
         .sidebar a {
             color: white;
             text-decoration: none;
-            padding: 10px 0;
+            padding: 10px 15px;
             display: block;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .sidebar a:hover {
+            background: #00509e;
         }
         .main-content {
             flex: 1;
@@ -37,12 +42,12 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-        .task-list, .user-list {
+        .task-list {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
         }
-        .task-item, .user-item {
+        .task-item {
             background: white;
             padding: 15px;
             border-radius: 10px;
@@ -55,9 +60,9 @@
             border-radius: 5px;
             cursor: pointer;
             color: white;
+            margin-top: 10px;
         }
-        .btn-accept { background: green; }
-        .btn-submit { background: blue; }
+        .btn-create { background: blue; }
         .btn-delete { background: red; }
     </style>
 </head>
@@ -79,8 +84,7 @@
             <input type="text" id="taskDesc" placeholder="Task Description">
             <select id="taskUser"></select>
             <input type="text" id="taskLink" placeholder="Submission Link">
-            <input type="file" id="taskFile">
-            <button class="btn-submit" onclick="createTask()">Create Task</button>
+            <button class="btn-create" onclick="createTask()">Create Task</button>
         </div>
         
         <h2>Task List</h2>
@@ -89,7 +93,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "API_KEY",
@@ -99,7 +103,7 @@
             messagingSenderId: "554720349093",
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
-        
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -119,18 +123,26 @@
         async function createTask() {
             const title = document.getElementById("taskTitle").value;
             const description = document.getElementById("taskDesc").value;
-            const assignedTo = document.getElementById("taskUser").value;
+            const assignedToCode = document.getElementById("taskUser").value;
             const link = document.getElementById("taskLink").value;
             
-            if (!title || !description || !assignedTo) {
+            if (!title || !description || !assignedToCode) {
                 alert("Please fill all fields");
                 return;
             }
-            
+
+            const userSnapshot = await getDocs(collection(db, "users"));
+            let assignedToName = "Unknown";
+            userSnapshot.forEach((docSnap) => {
+                if (docSnap.data().code === assignedToCode) {
+                    assignedToName = docSnap.data().name;
+                }
+            });
+
             await addDoc(collection(db, "tasks"), {
                 title,
                 description,
-                assignedTo,
+                assignedTo: assignedToName,
                 link
             });
             alert("Task Created");
@@ -148,7 +160,7 @@
                 div.innerHTML = `
                     <h3>${task.title}</h3>
                     <p>${task.description}</p>
-                    <p>Assigned to: ${task.assignedTo}</p>
+                    <p><strong>Assigned to:</strong> ${task.assignedTo}</p>
                     <a href="${task.link}" target="_blank">Task Link</a>
                     <button class="btn-delete" onclick="deleteTask('${docSnap.id}')">Delete</button>
                 `;
@@ -161,7 +173,7 @@
             alert("Task Deleted");
             loadTasks();
         }
-        
+
         loadUsers();
         loadTasks();
     </script>
