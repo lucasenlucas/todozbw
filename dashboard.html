@@ -74,19 +74,10 @@
         <p>Your role: <span id="user-role">Role</span></p>
         
         <div class="card">
-            <h2>Manage Users</h2>
-            <input type="text" id="userName" placeholder="User Name">
-            <input type="text" id="userRole" placeholder="Role">
-            <input type="text" id="userCode" placeholder="Access Code">
-            <button class="btn-submit" onclick="createUser()">Add User</button>
-            <h3>Existing Users</h3>
-            <div class="user-list" id="user-list"></div>
-        </div>
-        
-        <div class="card">
             <h2>Create Task</h2>
             <input type="text" id="taskTitle" placeholder="Task Title">
             <input type="text" id="taskDesc" placeholder="Task Description">
+            <select id="taskUser"></select>
             <input type="text" id="taskLink" placeholder="Submission Link">
             <input type="file" id="taskFile">
             <button class="btn-submit" onclick="createTask()">Create Task</button>
@@ -111,50 +102,68 @@
         
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        async function createUser() {
-            const name = document.getElementById("userName").value;
-            const role = document.getElementById("userRole").value;
-            const code = document.getElementById("userCode").value;
+
+        async function loadUsers() {
+            const userSelect = document.getElementById("taskUser");
+            userSelect.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "users"));
+            querySnapshot.forEach((docSnap) => {
+                const user = docSnap.data();
+                let option = document.createElement("option");
+                option.value = user.code;
+                option.textContent = user.name;
+                userSelect.appendChild(option);
+            });
+        }
+
+        async function createTask() {
+            const title = document.getElementById("taskTitle").value;
+            const description = document.getElementById("taskDesc").value;
+            const assignedTo = document.getElementById("taskUser").value;
+            const link = document.getElementById("taskLink").value;
             
-            if (!name || !role || !code) {
+            if (!title || !description || !assignedTo) {
                 alert("Please fill all fields");
                 return;
             }
             
-            await setDoc(doc(db, "users", code), {
-                name: name,
-                role: role,
-                code: code
+            await addDoc(collection(db, "tasks"), {
+                title,
+                description,
+                assignedTo,
+                link
             });
-            alert("User Added");
-            loadUsers();
+            alert("Task Created");
+            loadTasks();
         }
-        
-        async function loadUsers() {
-            const userList = document.getElementById("user-list");
-            userList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "users"));
+
+        async function loadTasks() {
+            const taskList = document.getElementById("task-list");
+            taskList.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "tasks"));
             querySnapshot.forEach((docSnap) => {
-                const user = docSnap.data();
+                const task = docSnap.data();
                 const div = document.createElement("div");
-                div.classList.add("user-item");
+                div.classList.add("task-item");
                 div.innerHTML = `
-                    <h3>${user.name}</h3>
-                    <p>Role: ${user.role}</p>
-                    <button class="btn-delete" onclick="deleteUser('${docSnap.id}')">Delete</button>
+                    <h3>${task.title}</h3>
+                    <p>${task.description}</p>
+                    <p>Assigned to: ${task.assignedTo}</p>
+                    <a href="${task.link}" target="_blank">Task Link</a>
+                    <button class="btn-delete" onclick="deleteTask('${docSnap.id}')">Delete</button>
                 `;
-                userList.appendChild(div);
+                taskList.appendChild(div);
             });
         }
 
-        async function deleteUser(userId) {
-            await deleteDoc(doc(db, "users", userId));
-            alert("User Deleted");
-            loadUsers();
+        async function deleteTask(taskId) {
+            await deleteDoc(doc(db, "tasks", taskId));
+            alert("Task Deleted");
+            loadTasks();
         }
         
         loadUsers();
+        loadTasks();
     </script>
 </body>
 </html>
