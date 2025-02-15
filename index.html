@@ -3,118 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zombie Warriors - Dashboard</title>
+    <title>Zombie Warriors - Staff Login</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
             background-color: #f4f4f4;
             color: #333;
-            text-align: center;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-        .container {
-            max-width: 700px;
-            margin: auto;
+        .login-container {
             background: white;
-            padding: 20px;
+            padding: 30px;
             border-radius: 15px;
+            text-align: center;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             animation: fadeIn 1s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        h1 { color: #5C67F2; }
-        .user-info { font-size: 18px; margin: 20px 0; }
-        .notice-image {
-            width: 100%;
-            max-width: 600px;
-            border-radius: 10px;
-            display: block;
-            margin: auto;
+        h1 {
+            font-size: 28px;
+            color: #5C67F2;
         }
-        .popup, .banner {
-            display: none;
-            position: fixed;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            z-index: 1000;
-        }
-        .popup { top: 50%; transform: translate(-50%, -50%); text-align: center; width: 300px; }
-        .banner { top: 10px; width: 80%; max-width: 600px; text-align: center; }
-        .admin-panel {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        input, select, button {
-            padding: 10px;
-            margin: 5px;
-            border: none;
-            border-radius: 10px;
+        .subtitle {
             font-size: 16px;
-            outline: none;
+            margin-bottom: 25px;
+            color: #666;
         }
-        input, select {
-            width: calc(100% - 20px);
-            background: #f8f8f8;
-            border: 1px solid #ccc;
+        form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input {
+            width: 80%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 25px;
+            background: #f0f0f0;
+            color: #333;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        input:focus {
+            border: 2px solid #5C67F2;
+            background: #fff;
         }
         button {
+            width: 80%;
+            padding: 14px;
+            border: none;
+            border-radius: 25px;
             background: #5C67F2;
             color: white;
+            font-size: 18px;
             cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
         }
-        button:hover { background: #4a5bd2; }
-        ul { list-style: none; padding: 0; }
-        li { background: #f8f8f8; margin: 5px 0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .delete-btn {
-            background: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 5px;
+        button:hover {
+            background: #4a54e1;
+        }
+        button:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome, <span id="username">User</span>!</h1>
-        <p class="user-info">Your permissions are set to: <span id="user-role">Role</span></p>
-        <p>Need help? Create a ticket or contact lm_hth.</p>
-        <img class="notice-image" src="https://webtinq.nl/fotos-howtohack/afbeeldingen/Scherm%C2%ADafbeelding%202025-02-15%20om%2018.47.43.png" alt="Notice">
-    </div>
-    
-    <div id="popup" class="popup"></div>
-    <div id="banner" class="banner"></div>
-
-    <div class="admin-panel" id="admin-panel">
-        <h2>Manage Notifications</h2>
-        <input type="text" id="notificationMessage" placeholder="Enter notification message">
-        <select id="notificationType">
-            <option value="popup">Popup</option>
-            <option value="banner">Banner</option>
-            <option value="alert">Alert</option>
-        </select>
-        <button id="addNotification">Add Notification</button>
-        <h3>Existing Notifications</h3>
-        <ul id="notification-list"></ul>
+    <div class="login-container">
+        <h1>Zombie Warriors Staff (To-Do)</h1>
+        <p class="subtitle">Enter your access code</p>
+        <form id="loginForm">
+            <input type="text" id="accessCode" placeholder="Access Code" required>
+            <button type="submit">Login</button>
+        </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "API_KEY",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
@@ -124,52 +106,27 @@
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const username = "Lucas";
-        const role = "Manager";
-        document.getElementById("username").textContent = username;
-        document.getElementById("user-role").textContent = role;
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const accessCode = document.getElementById("accessCode").value.trim();
+            if (!accessCode) return alert("Enter a valid access code.");
 
-        async function loadNotifications() {
-            const notificationList = document.getElementById("notification-list");
-            notificationList.innerHTML = "";
-            const querySnapshot = await getDocs(collection(db, "notifications"));
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const li = document.createElement("li");
-                li.innerHTML = `${data.type}: ${data.message} <button class='delete-btn' onclick="deleteNotification('${docSnap.id}')">Delete</button>`;
-                notificationList.appendChild(li);
-                showNotification(data.type, data.message);
-            });
-        }
+            const userRef = doc(db, "users", accessCode);
+            const userSnap = await getDoc(userRef);
 
-        async function addNotification() {
-            const message = document.getElementById("notificationMessage").value;
-            const type = document.getElementById("notificationType").value;
-            if (!message) return;
-            await addDoc(collection(db, "notifications"), { type, message });
-            document.getElementById("notificationMessage").value = "";
-            loadNotifications();
-        }
-
-        window.deleteNotification = async function(id) {
-            await deleteDoc(doc(db, "notifications", id));
-            loadNotifications();
-        };
-
-        function showNotification(type, message) {
-            if (type === "popup") document.getElementById("popup").textContent = message, document.getElementById("popup").style.display = "block";
-            else if (type === "banner") document.getElementById("banner").textContent = message, document.getElementById("banner").style.display = "block";
-            else if (type === "alert") alert(message);
-        }
-
-        if (role === "Manager") {
-            document.getElementById("admin-panel").style.display = "block";
-            document.getElementById("addNotification").addEventListener("click", addNotification);
-            loadNotifications();
-        }
+            if (userSnap.exists()) {
+                const userData = userSnap.data();
+                localStorage.setItem("username", userData.name);
+                localStorage.setItem("role", userData.role);
+                window.location.href = "dashboard.html"; // Stuur naar het dashboard
+            } else {
+                alert("Invalid access code.");
+            }
+        });
     </script>
 </body>
 </html>
