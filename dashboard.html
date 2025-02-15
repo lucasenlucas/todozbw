@@ -3,137 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zombie Warriors - Staff Login</title>
+    <title>Zombie Warriors - Dashboard</title>
     <style>
         body {
-            background-color: #f4f4f4;
-            color: #333;
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-        }
-        .login-container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 1s ease-in-out;
+            padding: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        h1 {
-            font-size: 28px;
-            color: #5C67F2;
-        }
-        .subtitle {
-            font-size: 16px;
-            margin-bottom: 25px;
-            color: #666;
-        }
-        form {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        input {
-            width: 80%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border: none;
-            border-radius: 25px;
-            background: #f0f0f0;
-            color: #333;
-            text-align: center;
-            outline: none;
-            transition: all 0.3s;
-            font-size: 16px;
-        }
-        input:focus {
-            border: 2px solid #5C67F2;
-            background: #fff;
-        }
-        button {
-            width: 80%;
-            padding: 14px;
-            border: none;
-            border-radius: 25px;
-            background: #5C67F2;
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(to bottom, #5CDEFF, #0047AB);
             color: white;
-            font-size: 18px;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid white;
+            padding-bottom: 10px;
+        }
+        .menu-item {
+            margin: 10px 0;
             cursor: pointer;
-            transition: background 0.3s, transform 0.1s;
         }
-        button:hover {
-            background: #4a54e1;
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: #0047AB;
+            color: white;
+            border-radius: 10px;
+            margin: 20px;
         }
-        button:active {
-            transform: scale(0.95);
+        .header {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin-bottom: 20px;
+        }
+        .badge {
+            background: linear-gradient(to right, #5CDEFF, #0047AB);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .main-content h1 {
+            font-size: 40px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h1>Zombie Warriors Staff (To-Do)</h1>
-        <p class="subtitle">Enter your access code</p>
-        <form id="loginForm">
-            <input type="text" id="accessCode" placeholder="Access Code" required>
-            <button type="submit">Login</button>
-        </form>
+    <div class="sidebar">
+        <h2>Staff Menu</h2>
+        <div class="menu-item">Item</div>
+        <div class="menu-item">Item</div>
+        <div class="menu-item">Item</div>
+        <div class="menu-item">Item</div>
+        <div class="menu-item">Item</div>
+        <div class="menu-item">Item</div>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <div class="badge" id="userName">{naam}</div>
+            <div class="badge" id="userRole">{rol}</div>
+        </div>
+        <h1>Weergave</h1>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "API_KEY",
-            authDomain: "zombiewarriors-todo.firebaseapp.com",
-            projectId: "zombiewarriors-todo",
-            storageBucket: "zombiewarriors-todo.firebaseapp.com",
-            messagingSenderId: "554720349093",
-            appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const accessCode = document.getElementById("accessCode").value.trim();
-            if (!accessCode) return alert("Enter a valid access code.");
-            
-            console.log("Checking access code: ", accessCode);
-            const userRef = doc(db, "users", accessCode);
-            try {
-                const userSnap = await getDoc(userRef);
-                
-                if (userSnap.exists()) {
-                    const userData = userSnap.data();
-                    console.log("User found: ", userData);
-                    localStorage.setItem("username", userData.name);
-                    localStorage.setItem("role", userData.role);
-                    window.location.href = "dashboard.html"; // Stuur naar het dashboard
-                } else {
-                    console.warn("Invalid access code: No user found");
-                    alert("Invalid access code.");
-                }
-            } catch (error) {
-                console.error("Error fetching user data: ", error);
-                alert("Error connecting to database.");
-            }
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const username = localStorage.getItem("username") || "Unknown";
+            const role = localStorage.getItem("role") || "No Role";
+            document.getElementById("userName").textContent = username;
+            document.getElementById("userRole").textContent = role;
         });
     </script>
 </body>
