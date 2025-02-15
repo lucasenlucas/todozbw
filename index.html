@@ -90,9 +90,10 @@
 
             if (userSnap.exists()) {
                 const userData = userSnap.data();
-                localStorage.setItem("username", userData.name);
-                localStorage.setItem("role", userData.role);
-                window.location.href = "dashboard.html";
+                const urlParams = new URLSearchParams();
+                urlParams.append("name", userData.name);
+                urlParams.append("role", userData.role);
+                window.location.href = `dashboard.html?${urlParams.toString()}`;
             } else {
                 alert("Invalid access code.");
             }
