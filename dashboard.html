@@ -33,30 +33,46 @@
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
             handleRoute();
+            loadTasks();
         });
 
-        // Handle URL-based navigation (GitHub Pages Fix)
-        function handleRoute() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const route = urlParams.get("route");
-            const validSections = ["dashboard", "team", "statistics", "tasks", "submitted"];
-            const section = validSections.includes(route) ? route : "dashboard";
-            showSection(section);
+        // Function to add tasks (Managers only)
+        async function addTask() {
+            const title = document.getElementById("taskTitle").value;
+            const assignedTo = document.getElementById("taskAssignedTo").value;
+            if (!title || !assignedTo) {
+                alert("Please fill in all fields.");
+                return;
+            }
+            await addDoc(collection(db, "tasks"), {
+                title: title,
+                assignedTo: assignedTo,
+                status: "new"
+            });
+            alert("Task added successfully!");
+            document.getElementById("taskForm").reset();
+            loadTasks();
+        }
+        window.addTask = addTask;
+
+        // Load tasks from Firestore
+        async function loadTasks() {
+            const tasksList = document.getElementById("tasksList");
+            tasksList.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "tasks"));
+            querySnapshot.forEach((doc) => {
+                const task = doc.data();
+                const taskItem = document.createElement("li");
+                taskItem.textContent = `${task.title} - Assigned to: ${task.assignedTo}`;
+                tasksList.appendChild(taskItem);
+            });
         }
 
-        // Show selected section and update URL
-        function showSection(section) {
-            document.querySelectorAll(".content-section").forEach(div => div.style.display = "none");
-            document.getElementById(section + "Section").style.display = "block";
-            window.history.pushState({}, "", `/dashboard/${section}`);
-        }
-        window.showSection = showSection;
-
-        // Logout function (Fix applied)
+        // Logout function
         function logout() {
-            sessionStorage.clear(); // Remove user data from session
+            sessionStorage.clear();
             setTimeout(() => {
-                window.location.href = "/index.html"; // Ensure redirect to login page
+                window.location.href = "/index.html";
             }, 100);
         }
         window.logout = logout;
@@ -100,12 +116,6 @@
             padding: 20px;
             text-align: center;
         }
-        .content-section {
-            display: none;
-        }
-        #dashboardSection {
-            display: block;
-        }
     </style>
 </head>
 <body>
@@ -124,28 +134,17 @@
         <h1>Welcome, <span id="userName"></span></h1>
         <div class="badge">Role: <span id="userRole"></span></div>
         
-        <div id="dashboardSection" class="content-section">
-            <h2>Dashboard View</h2>
-        </div>
-
-        <div id="teamSection" class="content-section">
-            <h2>Team Management</h2>
-            <p>Manage team members here.</p>
-        </div>
-
-        <div id="statisticsSection" class="content-section">
-            <h2>Statistics</h2>
-            <p>View staff and project statistics.</p>
-        </div>
-
         <div id="tasksSection" class="content-section">
             <h2>New Tasks</h2>
-            <p>See all new tasks assigned.</p>
-        </div>
-
-        <div id="submittedSection" class="content-section">
-            <h2>Submitted Tasks</h2>
-            <p>View all completed tasks.</p>
+            <ul id="tasksList"></ul>
+            <div id="taskFormSection">
+                <h3>Add New Task (Managers Only)</h3>
+                <form id="taskForm">
+                    <input type="text" id="taskTitle" placeholder="Task Title" required>
+                    <input type="text" id="taskAssignedTo" placeholder="Assign to" required>
+                    <button type="button" onclick="addTask()">Add Task</button>
+                </form>
+            </div>
         </div>
     </div>
 </body>
