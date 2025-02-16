@@ -34,7 +34,9 @@
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
             handleRoute();
-            loadTasks(userCode);
+            if (window.location.pathname.includes("tasks")) {
+                loadTasks(userCode);
+            }
         });
 
         // Function to add tasks (Managers only)
@@ -120,6 +122,12 @@
             flex-grow: 1;
             padding: 20px;
             text-align: center;
+        }
+        .content-section {
+            display: none;
+        }
+        #tasksSection {
+            display: block;
         }
     </style>
 </head>
