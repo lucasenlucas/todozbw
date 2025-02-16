@@ -39,18 +39,43 @@
             const sidebarMenu = document.getElementById("sidebar-menu");
             sidebarMenu.innerHTML = `
                 <li onclick="showSection('dashboard')">Dashboard</li>
-                ${userRole.toLowerCase() === "music producer" ? '<li onclick="showSection('uploadMusic')">Upload Music</li>' : ''}
-                ${userRole.toLowerCase() === "manager" ? '<li onclick="showSection('teamManagement')">Team Management</li><li onclick="showSection('viewMusic')">View Music</li>' : ''}
-                <li onclick="showSection('toDoList')">To-Do List</li>
+                ${userRole.toLowerCase() === "music producer" ? '<li onclick="showSection(\'uploadMusic\')">Upload Music</li>' : ''}
                 <li onclick="logout()" style="background: red; color: white; font-weight: bold;">Logout</li>
             `;
         });
 
         // Show selected section
         function showSection(section) {
-            document.querySelectorAll(".content-section").forEach(div => div.style.display = "none");
-            document.getElementById(section + "Section").style.display = "block";
+            document.getElementById("dashboardSection").style.display = section === "dashboard" ? "block" : "none";
+            document.getElementById("uploadSection").style.display = section === "uploadMusic" ? "block" : "none";
         }
+
+        // Upload Music Function
+        async function uploadMusic() {
+            const title = document.getElementById("musicTitle").value;
+            const description = document.getElementById("musicDescription").value;
+            const file = document.getElementById("musicFile").files[0];
+            if (!title || !description || !file) {
+                alert("Please fill in all fields and select a file.");
+                return;
+            }
+            
+            const storageRef = ref(storage, `music/${file.name}`);
+            await uploadBytes(storageRef, file);
+            const fileURL = await getDownloadURL(storageRef);
+            
+            await addDoc(collection(db, "music"), {
+                title: title,
+                description: description,
+                fileURL: fileURL,
+                uploadedBy: sessionStorage.getItem("userName"),
+                timestamp: new Date()
+            });
+            
+            alert("Music uploaded successfully!");
+            document.getElementById("musicUploadForm").reset();
+        }
+        window.uploadMusic = uploadMusic;
 
         // Logout function
         function logout() {
@@ -98,11 +123,21 @@
             padding: 20px;
             text-align: center;
         }
-        .content-section {
-            display: none;
+        .badge {
+            background: linear-gradient(to right, #50C878, #1F78D1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin: 10px;
+            display: inline-block;
         }
-        #dashboardSection {
-            display: block;
+        .upload-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: 20px auto;
         }
     </style>
 </head>
@@ -115,33 +150,18 @@
         <h1>Welcome, <span id="userName"></span></h1>
         <div class="badge">Role: <span id="userRole"></span></div>
 
-        <div id="dashboardSection" class="content-section">
+        <div id="dashboardSection">
             <h2>Dashboard View</h2>
         </div>
 
-        <div id="uploadMusicSection" class="content-section">
-            <h2>Upload Music</h2>
+        <div id="uploadSection" class="upload-form" style="display: none;">
+            <h3>Upload Music</h3>
             <form id="musicUploadForm">
                 <input type="text" id="musicTitle" placeholder="Title" required>
                 <textarea id="musicDescription" placeholder="Description" required></textarea>
                 <input type="file" id="musicFile" accept="audio/*" required>
                 <button type="button" onclick="uploadMusic()">Upload</button>
             </form>
-        </div>
-
-        <div id="teamManagementSection" class="content-section">
-            <h2>Team Management</h2>
-            <p>Manage team members here.</p>
-        </div>
-
-        <div id="viewMusicSection" class="content-section">
-            <h2>View Music</h2>
-            <p>Managers can view uploaded music here.</p>
-        </div>
-
-        <div id="toDoListSection" class="content-section">
-            <h2>To-Do List</h2>
-            <p>Manage your tasks here.</p>
         </div>
     </div>
 </body>
