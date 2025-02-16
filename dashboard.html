@@ -7,7 +7,7 @@
     <script type="module">
         // Load Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -24,7 +24,7 @@
         const db = getFirestore(app);
 
         // Retrieve user data
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             const userName = sessionStorage.getItem("userName");
             const userRole = sessionStorage.getItem("userRole");
             if (!userName || !userRole) {
@@ -32,7 +32,40 @@
             }
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
+            loadTasks();
         });
+
+        // Load tasks from Firestore
+        async function loadTasks() {
+            const tasksList = document.getElementById("tasksList");
+            tasksList.innerHTML = "";
+            const querySnapshot = await getDocs(collection(db, "tasks"));
+            querySnapshot.forEach((doc) => {
+                const task = doc.data();
+                const taskItem = document.createElement("li");
+                taskItem.textContent = `${task.title} - Assigned to: ${task.assignedTo}`;
+                tasksList.appendChild(taskItem);
+            });
+        }
+
+        // Add new task (Only for managers)
+        async function addTask() {
+            const title = document.getElementById("taskTitle").value;
+            const assignedTo = document.getElementById("taskAssignedTo").value;
+            if (!title || !assignedTo) {
+                alert("Please fill in all fields.");
+                return;
+            }
+            await addDoc(collection(db, "tasks"), {
+                title: title,
+                assignedTo: assignedTo,
+                status: "new"
+            });
+            alert("Task added successfully!");
+            document.getElementById("taskForm").reset();
+            loadTasks();
+        }
+        window.addTask = addTask;
 
         // Logout function
         function logout() {
@@ -80,14 +113,6 @@
             padding: 20px;
             text-align: center;
         }
-        .badge {
-            background: linear-gradient(to right, #50C878, #1F78D1);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            margin: 10px;
-            display: inline-block;
-        }
     </style>
 </head>
 <body>
@@ -97,14 +122,24 @@
             <li>Dashboard</li>
             <li>Team Management</li>
             <li>Statistics</li>
-            <li>To-Do List</li>
+            <li>New Tasks</li>
+            <li>Submitted Tasks</li>
             <li onclick="logout()" style="color: red; font-weight: bold;">Logout</li>
         </ul>
     </div>
     <div class="content">
         <h1>Welcome, <span id="userName"></span></h1>
         <div class="badge">Role: <span id="userRole"></span></div>
-        <h2>Dashboard View</h2>
+        <h2>New Tasks</h2>
+        <ul id="tasksList"></ul>
+        <div id="taskFormSection">
+            <h3>Add New Task (Managers Only)</h3>
+            <form id="taskForm">
+                <input type="text" id="taskTitle" placeholder="Task Title" required>
+                <input type="text" id="taskAssignedTo" placeholder="Assign to" required>
+                <button type="button" onclick="addTask()">Add Task</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>
