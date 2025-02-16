@@ -28,7 +28,7 @@
             const userName = sessionStorage.getItem("userName");
             const userRole = sessionStorage.getItem("userRole");
             if (!userName || !userRole) {
-                window.location.href = "index.html"; // Redirect to login if no data exists
+                window.location.replace("index.html"); // Redirect to login if no data exists
             }
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
@@ -52,10 +52,12 @@
         }
         window.showSection = showSection;
 
-        // Logout function
+        // Logout function (Fix applied)
         function logout() {
             sessionStorage.clear(); // Remove user data from session
-            window.location.href = "index.html"; // Redirect to login page
+            setTimeout(() => {
+                window.location.replace("index.html"); // Ensure redirect to login page
+            }, 100);
         }
         window.logout = logout;
     </script>
