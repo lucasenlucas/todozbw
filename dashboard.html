@@ -27,44 +27,49 @@
         document.addEventListener("DOMContentLoaded", async () => {
             const userName = sessionStorage.getItem("userName");
             const userRole = sessionStorage.getItem("userRole");
-            if (!userName || !userRole) {
+            const userCode = sessionStorage.getItem("userCode");
+            if (!userName || !userRole || !userCode) {
                 window.location.href = "/index.html"; // Redirect to login if no data exists
             }
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
             handleRoute();
-            loadTasks();
+            loadTasks(userCode);
         });
 
         // Function to add tasks (Managers only)
         async function addTask() {
             const title = document.getElementById("taskTitle").value;
             const assignedTo = document.getElementById("taskAssignedTo").value;
-            if (!title || !assignedTo) {
+            const description = document.getElementById("taskDescription").value;
+            if (!title || !assignedTo || !description) {
                 alert("Please fill in all fields.");
                 return;
             }
             await addDoc(collection(db, "tasks"), {
                 title: title,
                 assignedTo: assignedTo,
-                status: "new"
+                description: description,
+                status: "Open"
             });
             alert("Task added successfully!");
             document.getElementById("taskForm").reset();
-            loadTasks();
+            loadTasks(assignedTo);
         }
         window.addTask = addTask;
 
-        // Load tasks from Firestore
-        async function loadTasks() {
+        // Load tasks from Firestore (only tasks assigned to the logged-in user)
+        async function loadTasks(userCode) {
             const tasksList = document.getElementById("tasksList");
             tasksList.innerHTML = "";
             const querySnapshot = await getDocs(collection(db, "tasks"));
             querySnapshot.forEach((doc) => {
                 const task = doc.data();
-                const taskItem = document.createElement("li");
-                taskItem.textContent = `${task.title} - Assigned to: ${task.assignedTo}`;
-                tasksList.appendChild(taskItem);
+                if (task.assignedTo === userCode) {
+                    const taskItem = document.createElement("li");
+                    taskItem.textContent = `${task.title} - ${task.description} (Status: ${task.status})`;
+                    tasksList.appendChild(taskItem);
+                }
             });
         }
 
@@ -141,7 +146,8 @@
                 <h3>Add New Task (Managers Only)</h3>
                 <form id="taskForm">
                     <input type="text" id="taskTitle" placeholder="Task Title" required>
-                    <input type="text" id="taskAssignedTo" placeholder="Assign to" required>
+                    <input type="text" id="taskDescription" placeholder="Task Description" required>
+                    <input type="text" id="taskAssignedTo" placeholder="Assign to (User Code)" required>
                     <button type="button" onclick="addTask()">Add Task</button>
                 </form>
             </div>
