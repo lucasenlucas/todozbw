@@ -7,15 +7,14 @@
     <script type="module">
         // Load Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAXKSt2HUs4_SQ6uHdwqGC33UO3Z2vAsk0",
             authDomain: "zombiewarriors-todo.firebaseapp.com",
             projectId: "zombiewarriors-todo",
-            storageBucket: "zombiewarriors-todo.appspot.com",
+            storageBucket: "zombiewarriors-todo.firebasestorage.app",
             messagingSenderId: "554720349093",
             appId: "1:554720349093:web:f0093fc9a3440c32d5764c"
         };
@@ -23,9 +22,8 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
-        // Retrieve user data and generate menu
+        // Retrieve user data
         document.addEventListener("DOMContentLoaded", () => {
             const userName = sessionStorage.getItem("userName");
             const userRole = sessionStorage.getItem("userRole");
@@ -34,53 +32,12 @@
             }
             document.getElementById("userName").innerText = userName;
             document.getElementById("userRole").innerText = userRole;
-
-            // Generate menu
-            const sidebarMenu = document.getElementById("sidebar-menu");
-            sidebarMenu.innerHTML = `
-                <li onclick="showSection('dashboard')">Dashboard</li>
-                ${userRole.toLowerCase() === "music producer" ? '<li onclick="showSection(\'uploadMusic\')">Upload Music</li>' : ''}
-                <li onclick="logout()" style="background: red; color: white; font-weight: bold;">Logout</li>
-            `;
         });
-
-        // Show selected section
-        function showSection(section) {
-            document.getElementById("dashboardSection").style.display = section === "dashboard" ? "block" : "none";
-            document.getElementById("uploadSection").style.display = section === "uploadMusic" ? "block" : "none";
-        }
-
-        // Upload Music Function
-        async function uploadMusic() {
-            const title = document.getElementById("musicTitle").value;
-            const description = document.getElementById("musicDescription").value;
-            const file = document.getElementById("musicFile").files[0];
-            if (!title || !description || !file) {
-                alert("Please fill in all fields and select a file.");
-                return;
-            }
-            
-            const storageRef = ref(storage, `music/${file.name}`);
-            await uploadBytes(storageRef, file);
-            const fileURL = await getDownloadURL(storageRef);
-            
-            await addDoc(collection(db, "music"), {
-                title: title,
-                description: description,
-                fileURL: fileURL,
-                uploadedBy: sessionStorage.getItem("userName"),
-                timestamp: new Date()
-            });
-            
-            alert("Music uploaded successfully!");
-            document.getElementById("musicUploadForm").reset();
-        }
-        window.uploadMusic = uploadMusic;
 
         // Logout function
         function logout() {
-            sessionStorage.clear();
-            window.location.href = "index.html";
+            sessionStorage.clear(); // Remove user data from session
+            window.location.href = "index.html"; // Redirect to login page
         }
         window.logout = logout;
     </script>
@@ -131,38 +88,23 @@
             margin: 10px;
             display: inline-block;
         }
-        .upload-form {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            margin: 20px auto;
-        }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Staff Menu</h2>
-        <ul id="sidebar-menu"></ul>
+        <ul>
+            <li>Dashboard</li>
+            <li>Team Management</li>
+            <li>Statistics</li>
+            <li>To-Do List</li>
+            <li onclick="logout()" style="color: red; font-weight: bold;">Logout</li>
+        </ul>
     </div>
     <div class="content">
         <h1>Welcome, <span id="userName"></span></h1>
         <div class="badge">Role: <span id="userRole"></span></div>
-
-        <div id="dashboardSection">
-            <h2>Dashboard View</h2>
-        </div>
-
-        <div id="uploadSection" class="upload-form" style="display: none;">
-            <h3>Upload Music</h3>
-            <form id="musicUploadForm">
-                <input type="text" id="musicTitle" placeholder="Title" required>
-                <textarea id="musicDescription" placeholder="Description" required></textarea>
-                <input type="file" id="musicFile" accept="audio/*" required>
-                <button type="button" onclick="uploadMusic()">Upload</button>
-            </form>
-        </div>
+        <h2>Dashboard View</h2>
     </div>
 </body>
 </html>
